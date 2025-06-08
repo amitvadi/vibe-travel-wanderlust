@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,26 +13,9 @@ const TravelOnboarding = () => {
   const [selections, setSelections] = useState({
     destination: '',
     dates: { start: undefined as Date | undefined, end: undefined as Date | undefined },
-    duration: '',
-    travelStyle: '',
+    travelStyle: [] as string[],
     groupType: ''
   });
-
-  const destinations = [
-    { name: 'Tokyo, Japan', emoji: '🏯' },
-    { name: 'Paris, France', emoji: '🗼' },
-    { name: 'Bali, Indonesia', emoji: '🏝️' },
-    { name: 'New York, USA', emoji: '🗽' },
-    { name: 'Barcelona, Spain', emoji: '🏛️' },
-    { name: 'Other destination', emoji: '🌍' }
-  ];
-
-  const durations = [
-    { label: 'Weekend (2-3 days)', value: 'weekend', icon: Coffee },
-    { label: 'Short trip (4-7 days)', value: 'short', icon: Clock },
-    { label: 'Extended stay (1-2 weeks)', value: 'extended', icon: Calendar },
-    { label: 'Long adventure (3+ weeks)', value: 'long', icon: Mountain }
-  ];
 
   const travelStyles = [
     { label: 'Comfort & Luxury', value: 'luxury', icon: Heart, desc: 'Fine dining, premium stays' },
@@ -51,8 +35,17 @@ const TravelOnboarding = () => {
     setSelections(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleTravelStyleToggle = (value: string) => {
+    setSelections(prev => ({
+      ...prev,
+      travelStyle: prev.travelStyle.includes(value)
+        ? prev.travelStyle.filter(style => style !== value)
+        : [...prev.travelStyle, value]
+    }));
+  };
+
   const nextStep = () => {
-    if (step < 5) setStep(step + 1);
+    if (step < 3) setStep(step + 1);
   };
 
   const prevStep = () => {
@@ -63,9 +56,7 @@ const TravelOnboarding = () => {
     switch (step) {
       case 1: return selections.destination.trim().length > 0;
       case 2: return selections.dates.start && selections.dates.end;
-      case 3: return selections.duration;
-      case 4: return selections.travelStyle;
-      case 5: return selections.groupType;
+      case 3: return selections.travelStyle.length > 0 && selections.groupType;
       default: return false;
     }
   };
@@ -80,13 +71,13 @@ const TravelOnboarding = () => {
       {/* Progress bar */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-gray-600">Step {step} of 5</span>
-          <span className="text-sm text-gray-600">{Math.round((step / 5) * 100)}% complete</span>
+          <span className="text-sm text-gray-600">Step {step} of 3</span>
+          <span className="text-sm text-gray-600">{Math.round((step / 3) * 100)}% complete</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
             className="bg-gradient-sunset h-2 rounded-full transition-all duration-500"
-            style={{ width: `${(step / 5) * 100}%` }}
+            style={{ width: `${(step / 3) * 100}%` }}
           />
         </div>
       </div>
@@ -98,7 +89,7 @@ const TravelOnboarding = () => {
             <h2 className="text-3xl font-bold mb-4 text-center">Where do you want to go?</h2>
             <p className="text-gray-600 text-center mb-8">Enter your dream destination</p>
             
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md mx-auto mb-8">
               <Input
                 type="text"
                 placeholder="e.g. Tokyo, Paris, Bali..."
@@ -106,6 +97,22 @@ const TravelOnboarding = () => {
                 onChange={(e) => handleSelection('destination', e.target.value)}
                 className="w-full p-4 text-lg border-2 border-gray-200 rounded-xl focus:border-sunset-500 focus:ring-0"
               />
+            </div>
+
+            {/* Step indicators */}
+            <div className="flex justify-center gap-8 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-sunset-500 text-white flex items-center justify-center font-semibold">1</div>
+                <span>Destination</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold">2</div>
+                <span>Dates</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-semibold">3</div>
+                <span>Preferences</span>
+              </div>
             </div>
           </div>
         )}
@@ -167,85 +174,61 @@ const TravelOnboarding = () => {
 
         {step === 3 && (
           <div>
-            <h2 className="text-3xl font-bold mb-4 text-center">How long is your trip?</h2>
-            <p className="text-gray-600 text-center mb-8">This helps us recommend the right activities</p>
+            <h2 className="text-3xl font-bold mb-4 text-center">Tell us your preferences</h2>
+            <p className="text-gray-600 text-center mb-8">Select your travel style(s) and who's traveling</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {durations.map((duration) => {
-                const Icon = duration.icon;
-                return (
-                  <button
-                    key={duration.value}
-                    onClick={() => handleSelection('duration', duration.value)}
-                    className={cn(
-                      "p-6 rounded-xl border-2 transition-all hover:shadow-md text-left",
-                      selections.duration === duration.value
-                        ? "border-sunset-500 bg-sunset-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    )}
-                  >
-                    <Icon className="w-8 h-8 mb-3 text-sunset-500" />
-                    <div className="font-semibold text-gray-900">{duration.label}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+            <div className="space-y-8">
+              {/* Travel Styles - Multiple Selection */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-center">How do you like to travel? (Select all that apply)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {travelStyles.map((style) => {
+                    const Icon = style.icon;
+                    const isSelected = selections.travelStyle.includes(style.value);
+                    return (
+                      <button
+                        key={style.value}
+                        onClick={() => handleTravelStyleToggle(style.value)}
+                        className={cn(
+                          "p-6 rounded-xl border-2 transition-all hover:shadow-md text-left",
+                          isSelected
+                            ? "border-sunset-500 bg-sunset-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        )}
+                      >
+                        <Icon className="w-8 h-8 mb-3 text-sunset-500" />
+                        <div className="font-semibold text-gray-900 mb-1">{style.label}</div>
+                        <div className="text-sm text-gray-600">{style.desc}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-        {step === 4 && (
-          <div>
-            <h2 className="text-3xl font-bold mb-4 text-center">What's your travel style?</h2>
-            <p className="text-gray-600 text-center mb-8">We'll match you with experiences that fit your vibe</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {travelStyles.map((style) => {
-                const Icon = style.icon;
-                return (
-                  <button
-                    key={style.value}
-                    onClick={() => handleSelection('travelStyle', style.value)}
-                    className={cn(
-                      "p-6 rounded-xl border-2 transition-all hover:shadow-md text-left",
-                      selections.travelStyle === style.value
-                        ? "border-sunset-500 bg-sunset-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    )}
-                  >
-                    <Icon className="w-8 h-8 mb-3 text-sunset-500" />
-                    <div className="font-semibold text-gray-900 mb-1">{style.label}</div>
-                    <div className="text-sm text-gray-600">{style.desc}</div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div>
-            <h2 className="text-3xl font-bold mb-4 text-center">Who's traveling?</h2>
-            <p className="text-gray-600 text-center mb-8">This helps us find group-friendly activities</p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {groupTypes.map((group) => {
-                const Icon = group.icon;
-                return (
-                  <button
-                    key={group.value}
-                    onClick={() => handleSelection('groupType', group.value)}
-                    className={cn(
-                      "p-6 rounded-xl border-2 transition-all hover:shadow-md text-center",
-                      selections.groupType === group.value
-                        ? "border-sunset-500 bg-sunset-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    )}
-                  >
-                    <Icon className="w-8 h-8 mb-3 text-sunset-500 mx-auto" />
-                    <div className="font-semibold text-gray-900">{group.label}</div>
-                  </button>
-                );
-              })}
+              {/* Group Type - Single Selection */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-center">Who's traveling?</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {groupTypes.map((group) => {
+                    const Icon = group.icon;
+                    return (
+                      <button
+                        key={group.value}
+                        onClick={() => handleSelection('groupType', group.value)}
+                        className={cn(
+                          "p-6 rounded-xl border-2 transition-all hover:shadow-md text-center",
+                          selections.groupType === group.value
+                            ? "border-sunset-500 bg-sunset-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        )}
+                      >
+                        <Icon className="w-8 h-8 mb-3 text-sunset-500 mx-auto" />
+                        <div className="font-semibold text-gray-900">{group.label}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -261,7 +244,7 @@ const TravelOnboarding = () => {
             Back
           </Button>
 
-          {step < 5 ? (
+          {step < 3 ? (
             <Button
               onClick={nextStep}
               disabled={!canProceed()}
