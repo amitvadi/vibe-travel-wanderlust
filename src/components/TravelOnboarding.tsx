@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Calendar, MapPin, Clock, Heart, Zap, Coffee, Mountain, Camera, Users, User } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -61,7 +61,7 @@ const TravelOnboarding = () => {
 
   const canProceed = () => {
     switch (step) {
-      case 1: return selections.destination;
+      case 1: return selections.destination.trim().length > 0;
       case 2: return selections.dates.start && selections.dates.end;
       case 3: return selections.duration;
       case 4: return selections.travelStyle;
@@ -96,24 +96,16 @@ const TravelOnboarding = () => {
         {step === 1 && (
           <div>
             <h2 className="text-3xl font-bold mb-4 text-center">Where do you want to go?</h2>
-            <p className="text-gray-600 text-center mb-8">Pick a destination to start planning your adventure</p>
+            <p className="text-gray-600 text-center mb-8">Enter your dream destination</p>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {destinations.map((dest) => (
-                <button
-                  key={dest.name}
-                  onClick={() => handleSelection('destination', dest.name)}
-                  className={cn(
-                    "p-4 rounded-xl border-2 transition-all hover:shadow-md text-left",
-                    selections.destination === dest.name
-                      ? "border-sunset-500 bg-sunset-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  )}
-                >
-                  <div className="text-2xl mb-2">{dest.emoji}</div>
-                  <div className="font-medium text-gray-900">{dest.name}</div>
-                </button>
-              ))}
+            <div className="max-w-md mx-auto">
+              <Input
+                type="text"
+                placeholder="e.g. Tokyo, Paris, Bali..."
+                value={selections.destination}
+                onChange={(e) => handleSelection('destination', e.target.value)}
+                className="w-full p-4 text-lg border-2 border-gray-200 rounded-xl focus:border-sunset-500 focus:ring-0"
+              />
             </div>
           </div>
         )}
